@@ -1,0 +1,19 @@
+[{
+  name: 'commonName',
+  value: 'ca.usertoken.com'
+}, {
+  name: 'countryName',
+  value: 'US'
+}, {
+  shortName: 'ST',
+  value: 'DE'
+}, {
+  name: 'localityName',
+  value: 'Wilmington'
+}, {
+  name: 'organizationName',
+  value: 'User Token'
+}, {
+  shortName: 'OU',
+  value: 'Research and Development'
+}]

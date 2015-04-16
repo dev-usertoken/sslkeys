@@ -1,0 +1,33 @@
+var e = require('./encdec.js');
+var test = require('assert');
+
+var MongoClient = require('mongodb').MongoClient;
+
+
+ MongoClient.connect("mongodb://localhost:27017/keys", {
+    db: { native_parser: false },
+    server: { socketOptions: { connectTimeoutMS: 500 } },
+    replSet: {},
+    mongos: {}
+}, function(err, db) {
+  test.equal(null, err);
+  test.ok(db != null);
+
+  col = db.collection('ssl');
+  bulk = col.initializeUnorderedBulkOp();
+
+  maxKeys = 60000;
+
+  col.drop();
+    for(i=0; i<maxKeys;i++){
+      var enc = e.encrypt(i.toString());
+      var doc = {serial: i, encData: enc};
+      col.insert(doc, {w:1}, function(err, result) {});
+//      console.log(doc);
+};
+  db.close();
+  console.log("Keys created : " + maxKeys);
+});
+
+
+

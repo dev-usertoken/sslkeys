@@ -1,0 +1,47 @@
+var Promise = require('bluebird');
+var mongo = require('mongodb-next');
+var fs = require('fs'); // var fs = Promise.promisifyAll(require("fs"));
+var pki = require('./pki.js');
+
+var attrs = [{ name: 'commonName', value: 'ca.usertoken.com' },
+            { name: 'countryName', value: 'US' },
+            { shortName: 'ST', value: 'DE' },
+            { name: 'localityName', value: 'Wilmington' },
+            { name: 'organizationName', value: 'User Token' },
+            { shortName: 'OU', value: 'Research and Development' }];
+
+var db = mongo("mongodb://localhost:27017/keys", { w: 'majority' });
+
+    var serial = 2
+    while(serial) {
+      console.log("serial: " + serial);
+      var certs = pki.createCertificate(attrs, serial.toString(16));
+      console.log("certs: " + certs);
+      serial--;
+    }
+
+/*
+  fs.readFileAsync("fqdn.json", "utf-8").then(function (json) {
+    var attrs = JSON.parse(json);
+    console.log(attrs);
+    var certificates = pki.createCertificate(attrs, 100);
+    console.log(certificates);
+  });
+
+    db.connect.then(function () {
+      db.collection('ssl').insert(pem).then(function (results) {
+      console.log(results)
+      });
+    });
+    }).catch(Promise.OperationalError, function (e) {
+      console.error("unable to read file, because: ", e.message);
+});
+
+/*
+console.log('\nKey-Pair:');
+console.log(pem.privateKey);
+console.log(pem.publicKey);
+
+console.log('\nCertificate:');
+console.log(pem.certificate);
+*/

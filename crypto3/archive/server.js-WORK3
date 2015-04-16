@@ -1,0 +1,27 @@
+var mongo = require('mongodb-next');
+var fs = require('fs');
+var pki = require('./pki.js');
+
+var attrs = [{ name: 'commonName', value: 'ca.usertoken.com' },
+            { name: 'countryName', value: 'US' },
+            { shortName: 'ST', value: 'DE' },
+            { name: 'localityName', value: 'Wilmington' },
+            { name: 'organizationName', value: 'User Token' },
+            { shortName: 'OU', value: 'Research and Development' }];
+
+var db = mongo("mongodb://localhost:27017/keys", { w: 'majority' });
+
+var count = 1
+while(count) {
+  var serial = count-1;
+  var cert = pki.createCertificate(attrs, serial.toString(16));
+  db.connect.then(function () {
+    col = db.collection('ssl');
+    query = { serial: serial, certs: cert };
+    console.log(query);
+    col.insert(query).then(function (things) {
+    console.log(things)
+    })
+  })
+  count--;
+};
