@@ -21,7 +21,6 @@ var crypto = require('crypto');
 var ALGORITHM, HMAC_ALGORITHM;
 
 
-
 exports.encrypt = function (plain_text) {
 
     var ALGORITHM = 'AES-256-CBC'; // CBC because CTR isn't possible with the current version of the Node.JS crypto library
@@ -46,7 +45,7 @@ exports.encrypt = function (plain_text) {
 
     // The IV isn't a secret so it can be stored along side everything else
 //    return cipher_text + "$" + IV.toString('hex') + "$" + hmac.digest('hex')
-    var output = {algorithm: ALGORITHM, hmacAlgorithm: HMAC_ALGORITHM, key: KEY, hmacKey: HMAC_KEY, cipherText: cipher_text
+    var output = {keyId: plain_text, algorithm: ALGORITHM, hmacAlgorithm: HMAC_ALGORITHM, key: KEY, hmacKey: HMAC_KEY, cipherText: cipher_text
                   , IV:  IV.toString('hex') , hmacDigest:  hmac.digest('hex')};
     return output;
 
@@ -62,6 +61,7 @@ exports.decrypt = function (cipher_text) {
     var HMAC_KEY = c.hmacKey;
     var HMAC_ALGORITHM = c.hmacAlgorithm;
     var ALGORITHM = c.algorithm;
+    var keyId = c.keyId;
     var decryptor;
 
     chmac = crypto.createHmac(HMAC_ALGORITHM, HMAC_KEY);

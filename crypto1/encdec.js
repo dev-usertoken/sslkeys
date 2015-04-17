@@ -21,17 +21,16 @@ var crypto = require('crypto');
 var ALGORITHM, HMAC_ALGORITHM;
 
 
-
 exports.encrypt = function (plain_text) {
 
     var ALGORITHM = 'AES-256-CBC'; // CBC because CTR isn't possible with the current version of the Node.JS crypto library
     var HMAC_ALGORITHM = 'SHA256';
-    var KEY = crypto.randomBytes(32); // This key should be stored in an environment variable
-    var HMAC_KEY = crypto.randomBytes(32); // This key should be stored in an environment variable
-    var IV = new Buffer(crypto.randomBytes(16)); // ensure that the IV (initialization vector) is random
     var cipher_text;
     var hmac;
     var encryptor;
+    var KEY = new Buffer(crypto.randomBytes(32)); // This key should be stored in an environment variable
+    var HMAC_KEY = new Buffer(crypto.randomBytes(32)); // This key should be stored in an environment variable
+    var IV = new Buffer(crypto.randomBytes(16)); // ensure that the IV (initialization vector) is random
 
     encryptor = crypto.createCipheriv(ALGORITHM, KEY, IV);
     encryptor.setEncoding('hex');
@@ -46,7 +45,8 @@ exports.encrypt = function (plain_text) {
 
     // The IV isn't a secret so it can be stored along side everything else
 //    return cipher_text + "$" + IV.toString('hex') + "$" + hmac.digest('hex')
-    var output = {algorithm: ALGORITHM, hmacAlgorithm: HMAC_ALGORITHM, key: KEY, hmacKey: HMAC_KEY, cipherText: cipher_text
+    var output = {keyId: plain_text, algorithm: ALGORITHM, hmacAlgorithm: HMAC_ALGORITHM, cipherText: cipher_text
+                  , key: KEY.toString('hex') , hmacKey: HMAC_KEY.toString('hex')
                   , IV:  IV.toString('hex') , hmacDigest:  hmac.digest('hex')};
     return output;
 
@@ -55,18 +55,23 @@ exports.encrypt = function (plain_text) {
 exports.decrypt = function (cipher_text) {
 
     var c = cipher_text;
-    var ct = c.cipherText;
-    var IV = new Buffer(c.IV, 'hex');
-    var hmac = c.hmacDigest;
-    var KEY = c.key;
-    var HMAC_KEY = c.hmacKey;
-    var HMAC_ALGORITHM = c.hmacAlgorithm;
+    var keyId = c.keyId;
     var ALGORITHM = c.algorithm;
+    var HMAC_ALGORITHM = c.hmacAlgorithm;
+    var ct = c.cipherText;
+
+    var KEY = new Buffer(parseInt(c.key, 'hex'));
+    var HMAC_KEY = new Buffer(parseInt(c.hmacKey, 'hex'));
+    var IV = new Buffer(parseInt(c.IV, 'hex'));
+    var hmac = c.hmacDigest;
     var decryptor;
+    return c;
+
+
 
     chmac = crypto.createHmac(HMAC_ALGORITHM, HMAC_KEY);
     chmac.update(ct);
-    chmac.update(IV.toString('hex'));
+    chmac.update(IV)
 
     if (!constant_time_compare(chmac.digest('hex'), hmac)) {
         console.log("Encrypted Blob has been tampered with...");
@@ -76,7 +81,6 @@ exports.decrypt = function (cipher_text) {
     decryptor = crypto.createDecipheriv(ALGORITHM, KEY, IV);
     decryptor.update(ct, 'hex', 'utf8');
     return decryptor.final('utf-8')
-
 
 };
 

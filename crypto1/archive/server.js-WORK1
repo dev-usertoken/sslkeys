@@ -4,7 +4,6 @@ var   test = require('assert');
 var MongoClient = require('mongodb').MongoClient;
 
 MongoClient.connect('mongodb://localhost:27017/keys', function(err, db) {
-// MongoClient.connect('mongodb://rw:rw-2015@ds061721.mongolab.com:61721/keys', function(err, db) {
   if(err) throw err;
 
   loopFactor = 10000;

@@ -15,7 +15,7 @@ var db = mongo("mongodb://rw:rw-2015@ds061721.mongolab.com:61721/keys", { w: 0 }
     col = db.collection('ssl');
     var count = 10000;
     while(count) {
-      var serial = count-1;
+      var serial = 30000+count-1;
       col.insert(pki.createCertificate(attrs, serial.toString(16))).then(function (things) {
         console.log(things)
       })

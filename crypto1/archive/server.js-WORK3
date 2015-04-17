@@ -3,32 +3,26 @@ var MongoClient = require('mongodb').MongoClient
   , dotenv = require('dotenv').load()
   , e = require(__dirname + '/encdec.js');
 
-
+// Connection URL
 var url = process.env.MongoDB || 'mongodb://localhost:27017/keys';
 var counter = process.env.Counter || 10;
-
+// Use connect method to connect to the Server
 MongoClient.connect(url, function(err, db) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
+
   var col = db.collection('ssl');
-
+  // Create ordered bulk, for unordered initializeUnorderedBulkOp()
   var bulk = col.initializeOrderedBulkOp();
-
+  // Insert documents
   for(var i = 0; i < counter; i++) {
     if (!i) col.drop();
     bulk.insert(e.encrypt(i.toString()));
   }
 
-  // bulk insert
+  // Execute the bulk with a journal write concern
   bulk.execute(function(err, result) {
     assert.equal(null, err);
-  });
-
-  // verify one
-  col.find({}).limit(1).toArray(function(err, doc) {
-//    console.log(doc[0]);
-    var clearText = e.decrypt(doc[0]);
-    console.log(clearText);
     db.close();
   });
 });

@@ -14,6 +14,7 @@ var keys = forge.pki.rsa.generateKeyPair(2048);
 var cert = forge.pki.createCertificate();
 cert.publicKey = keys.publicKey;
 cert.serialNumber = serial; // cert.serialNumber = serial + forge.util.bytesToHex(forge.random.getBytesSync(19));
+// console.log("serial: " + serial);
 cert.validity.notBefore = new Date();
 cert.validity.notAfter = new Date();
 cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 20);
@@ -71,8 +72,17 @@ var certClean =
           {"certificate": JSON.parse(JSON.stringify(pem.certificate).replace(/\\r\\nMI/gm, " MI").replace(/\\r\\n-----END/gm, " -----END").replace(/\\r\\n/gm, ""))}
           ];
 
-var cert = [{"privateKey": pem.privateKey}, {"publicKey": pem.publicKey}, {"certificate": pem.certificate}];
+var certRaw = [{"serial": cert.serialNumber}, {"privateKey": pem.privateKey}, {"publicKey": pem.publicKey}, {"certificate": pem.certificate}];
 
-//return certificates;
-return cert;
+var certCooked = {};
+certCooked.privateKey = pem.privateKey;
+certCooked.publicKey = pem.publicKey;
+certCooked.certificate = pem.certificate;
+
+stringOut = {};
+stringOut.userId = parseInt(serial, 16);
+stringOut.certs = certCooked;
+console.log("serial: " + serial + " Int: " + stringOut.userId);
+
+return (stringOut);
 };
